@@ -4,6 +4,13 @@ import logging
 from tqdm import tqdm
 from neo4j import GraphDatabase, exceptions
 
+from dotenv import load_dotenv
+# Load environment variables
+load_dotenv()
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+
+
 # Configure logging
 log_dir = '../.log'
 log_file = 'import_errors.log'
@@ -75,7 +82,5 @@ def import_cpe_data(file_path, uri, user, password):
 if __name__ == "__main__":
     file_path = '../data/cpe/cpe_dictionary.json'
     uri = "bolt://localhost:7687"  # Update if your Neo4j instance is hosted elsewhere
-    user = "neo4j"                 # Your Neo4j username
-    password = "Neo4j678!@"          # Your Neo4j password
 
-    import_cpe_data(file_path, uri, user, password)
+    import_cpe_data(file_path, uri, NEO4J_USERNAME, NEO4J_PASSWORD)

@@ -4,6 +4,13 @@ import logging
 from tqdm import tqdm
 from neo4j import GraphDatabase
 
+from dotenv import load_dotenv
+# Load environment variables
+load_dotenv()
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+
+
 # --- Configure logging ---
 log_dir = '../.log'
 log_file = 'cve_import_errors.log'
@@ -400,28 +407,40 @@ def create_workaround_node(tx, cve_id, container_type, workaround):
     )
 
 # --- Import multiple files ---
-
 def import_cve_data(directory, driver):
-
     cve_files = []
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file.startswith('CVE') and file.endswith('.json'):
-                cve_files.append(os.path.join(root, file))
 
-    for cve_file in tqdm(cve_files, desc="Importing CVE files", unit="file"):
-        import_cve_file(cve_file, driver)
+    # Confirm os.walk is working
+    print(f"🔍 Scanning directory: {directory}")
+
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            if file.startswith("CVE-") and file.endswith(".json"):
+                full_path = os.path.join(root, file)
+                cve_files.append(full_path)
+
+    if not cve_files:
+        print("⚠️ No CVE files found. Check directory structure or path.")
+        return
+
+    print(f"✅ Found {len(cve_files)} CVE JSON files in '{directory}'")
+
+    # Now import each file
+    for cve_file in tqdm(cve_files, desc="📦 Importing CVE files", unit="file"):
+        try:
+            import_cve_file(cve_file, driver)
+        except Exception as e:
+            print(f"[❌] Error importing {cve_file}: {e}")
 
 # --- Main ---
 
 if __name__ == "__main__":
     #cve_directory = './data/cve/2024'  # Directory containing CVE JSON files
-    cve_directory = './data/cve/cvelistV5-main/cves/2024'  # Directory containing CVE JSON files
+    #cve_directory = './data/cve/cvelistV5-main/cves/2024'  # Directory containing CVE JSON files
+    cve_directory = '../data/cve/cvelistV5-main/cves'  # Directory containing CVE JSON files
     uri = "bolt://localhost:7687"
-    user = "neo4j"
-    password = "Neo4j678!@"
 
-    driver = GraphDatabase.driver(uri, auth=(user, password))
+    driver = GraphDatabase.driver(uri, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
     create_constraint(driver)
     import_cve_data(cve_directory, driver)

@@ -10,8 +10,14 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-# Neo4j connection setup
-driver = GraphDatabase.driver("bolt://localhost:7687", auth=("neo4j", "Neo4j678!@"))
+from dotenv import load_dotenv
+# Load environment variables
+load_dotenv()
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+# Neo4j connection
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+
 
 def import_cwe_data(cwe_json_path: str):
     logging.info(f"Loading CWE data from: {cwe_json_path}")
