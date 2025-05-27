@@ -2,6 +2,7 @@ import os
 import requests
 from tqdm import tqdm
 
+
 # URL of the latest MITRE ATT&CK Enterprise STIX 2.1 JSON file
 json_url = 'https://raw.githubusercontent.com/mitre-attack/attack-stix-data/master/enterprise-attack/enterprise-attack.json'
 

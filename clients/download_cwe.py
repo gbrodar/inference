@@ -4,6 +4,7 @@ import zipfile
 from tqdm import tqdm
 from io import BytesIO
 
+
 # List of URLs to download
 zip_urls = [
     'https://cwe.mitre.org/data/csv/699.csv.zip',

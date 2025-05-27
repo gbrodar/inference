@@ -13,7 +13,6 @@ save_path = os.path.join(save_dir, json_filename)
 # Ensure the directory exists
 os.makedirs(save_dir, exist_ok=True)
 
-
 # Function to download the JSON file with a progress bar
 def download_json(url, save_path):
     response = requests.get(url, stream=True)

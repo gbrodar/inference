@@ -8,7 +8,6 @@ from tqdm import tqdm
 NVD_API_KEY = "d9e7b673-c4cd-47e1-892d-f70f02c0f0d"
 NVD_API_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 
-
 def download_cve_feed(start_year=2015, output_dir="../data"):
     """
     Download and extract CVE data from NVD feeds for years from start_year to the current year.

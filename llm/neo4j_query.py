@@ -4,16 +4,24 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 import os
 
-OPENAI_API_KEY = "sk-proj-fXjUU0bazogOV-SUjBxg2VuXpdUxA1uNZPuJZUGi50ONAOrmMhKd0QR5YiK_EZpBdegQx5UgOpT3BlbkFJvQS4jXDE"\
-                 "DmlBcvUvzu-okdiyMjHANsFBTecUhPGnIMOKDfficGy4wXrFQ2ms6r2GXXRY9J8PMA"
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Neo4j connection
+driver = GraphDatabase.driver("bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+
 
 def get_query_from_openai():
 
     llm = ChatOpenAI(model="gpt-4o", temperature=0, api_key=OPENAI_API_KEY)
     graph = Neo4jGraph(
         url="bolt://localhost:7687",  # Or your remote URL
-        username="neo4j",
-        password="Neo4j678!@"
+        username=NEO4J_USERNAME,
+        password=NEO4J_PASSWORD
     )
 
     schema = graph.get_schema

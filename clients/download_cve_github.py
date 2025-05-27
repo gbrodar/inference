@@ -4,6 +4,7 @@ import zipfile
 from tqdm import tqdm
 from io import BytesIO
 
+
 # URL of the main branch ZIP file
 zip_url = 'https://github.com/CVEProject/cvelistV5/archive/refs/heads/main.zip'
 
