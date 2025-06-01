@@ -54,7 +54,6 @@ def create_attack_relationship(tx, rel):
         MERGE (a)-[r:ATTACK_REL {type: $rel_type}]->(b)
     """, source_id=source_id, target_id=target_id, rel_type=rel_type)
 
-# Run full import
 def import_attack_bundle(stix_objects):
     with driver.session() as session:
         for obj in tqdm(stix_objects, desc="🧱 Creating STIX nodes"):
@@ -65,10 +64,69 @@ def import_attack_bundle(stix_objects):
             if obj['type'] == 'relationship':
                 session.execute_write(create_attack_relationship, obj)
 
+def link_attack_patterns_to_tactics(stix_objects):
+    with driver.session() as session:
+        for obj in tqdm(stix_objects, desc="🔗 Linking attack-patterns to tactics"):
+            if obj.get("type") == "attack-pattern":
+                attack_pattern_id = obj.get("id")
+                kill_chain_phases = obj.get("kill_chain_phases", [])
+
+                for phase in kill_chain_phases:
+                    if phase.get("kill_chain_name") == "mitre-attack":
+                        tactic_shortname_raw = phase.get("phase_name")
+                        if tactic_shortname_raw:
+                            session.execute_write(
+                                create_tactic_relationship,
+                                attack_pattern_id,
+                                tactic_shortname_raw
+                            )
+
+def create_tactic_relationship(tx, attack_pattern_id, phase_name_raw):
+    # Normalize: "defense-evasion" -> "defense evasion"
+    normalized_phase = phase_name_raw.replace("-", " ").lower()
+
+    tx.run("""
+        MATCH (a:ATTACK_PATTERN {id: $attack_pattern_id})
+        MATCH (b:X_MITRE_TACTIC)
+        WHERE toLower(b.name) = $normalized_phase
+        MERGE (a)-[:USES_TACTIC]->(b)
+    """, attack_pattern_id=attack_pattern_id, normalized_phase=normalized_phase)
+
+def create_ttp_node(tx, attack_pattern_id, external_id, url):
+    tx.run("""
+        MERGE (t:TTP {external_id: $external_id})
+        SET t.url = $url
+        WITH t
+        MATCH (a:ATTACK_PATTERN {id: $attack_pattern_id})
+        MERGE (a)-[:HAS_TTP]->(t)
+    """, attack_pattern_id=attack_pattern_id, external_id=external_id, url=url)
+
+def link_attack_patterns_to_ttps(stix_objects):
+    with driver.session() as session:
+        for obj in tqdm(stix_objects, desc="🎯 Linking attack-patterns to TTPs"):
+            if obj.get("type") == "attack-pattern":
+                attack_pattern_id = obj.get("id")
+                refs = obj.get("external_references", [])
+                for ref in refs:
+                    if (
+                        ref.get("source_name") == "mitre-attack" and
+                        ref.get("external_id", "").startswith("T")
+                    ):
+                        external_id = ref["external_id"]
+                        url = ref.get("url", "")
+                        session.execute_write(
+                            create_ttp_node,
+                            attack_pattern_id,
+                            external_id,
+                            url
+                        )
+
 # Entry point
 if __name__ == "__main__":
     path = "../data/enterprise-attack/enterprise-attack.json"  # adjust path as needed
     print(f"📦 Loading ATT&CK STIX bundle from {path}")
     stix_objects = load_attack_bundle(path)
     import_attack_bundle(stix_objects)
+    link_attack_patterns_to_tactics(stix_objects)
+    link_attack_patterns_to_ttps(stix_objects)
     print("✅ ATT&CK STIX import complete.")

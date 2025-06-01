@@ -118,6 +118,47 @@ def load_capec_data(file_path):
                 capec_id = entry.get("ID") or entry.get("'ID")
                 print(f"[❌] Error linking CAPEC-{capec_id}: {e}")
 
+# Extract TTPs from taxonomy mappings
+def extract_attack_taxonomy_ttps(taxonomy_string):
+    if not taxonomy_string:
+        return []
+    mappings = []
+    chunks = taxonomy_string.split("TAXONOMY NAME:")
+    for chunk in chunks:
+        if chunk.startswith("ATTACK"):
+            match = re.search(r"ENTRY ID:(\d+)", chunk)
+            if match:
+                mappings.append(f"T{match.group(1)}")
+    return mappings
+
+# Create the link
+def create_capec_ttp_link(tx, capec_id, external_id):
+    tx.run("""
+        MATCH (c:CAPEC {id: $capec_id})
+        MATCH (t:TTP {external_id: $external_id})
+        MERGE (c)-[:USES_TTP]->(t)
+    """, capec_id=capec_id, external_id=external_id)
+
+# Link pass
+def link_capecs_to_ttps_via_taxonomy(file_path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        capec_entries = json.load(f)
+
+    with driver.session() as session:
+        for entry in tqdm(capec_entries, desc="📎 Linking CAPECs via Taxonomy", unit="capec"):
+            capec_raw_id = entry.get("ID") or entry.get("'ID")
+            capec_id = f"CAPEC-{capec_raw_id}"
+            taxonomy_string = entry.get("Taxonomy Mappings", "")
+
+            for ttp_id in extract_attack_taxonomy_ttps(taxonomy_string):
+                try:
+                    session.execute_write(create_capec_ttp_link, capec_id, ttp_id)
+                except Exception as e:
+                    print(f"[❌] Failed to link {capec_id} to {ttp_id}: {e}")
+
 if __name__ == "__main__":
-    load_capec_data("../data/capec/capec_data.json")
+    #load_capec_data("../data/capec/capec_data.json")
+    path_to_capec = "../data/capec/capec_data.json"
+    link_capecs_to_ttps_via_taxonomy(path_to_capec)
+    print("✅ CAPEC → TTP linking via Taxonomy complete.")
     print("✅ CAPEC import and relationship linking completed.")
