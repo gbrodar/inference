@@ -18,22 +18,22 @@ driver = GraphDatabase.driver(
 model = SentenceTransformer("BAAI/bge-base-en-v1.5", device="cuda")
 
 # === Query node data ===
-def fetch_nodes(label, fields):
+def fetch_nodes(label, fields, id_field="id"):
     with driver.session() as session:
         result = session.run(
             f"""
             MATCH (n:{label})
-            RETURN n.id AS id, {", ".join([f"n.{f} AS {f}" for f in fields])}
+            RETURN n.{id_field} AS id, {", ".join([f"n.{f} AS {f}" for f in fields])}
             """
         )
         return [record.data() for record in result]
 
 # === Store embedding ===
-def store_embedding(label, node_id, embedding):
+def store_embedding(label, node_id, embedding, id_field="id"):
     with driver.session() as session:
         session.run(
             f"""
-            MATCH (n:{label} {{id: $node_id}})
+            MATCH (n:{label} {{{id_field}: $node_id}})
             SET n.embedding = $embedding
             """,
             node_id=node_id,
@@ -45,21 +45,24 @@ def embed_text(text):
     return model.encode(text, convert_to_numpy=True).tolist()
 
 # === Run vectorization for a label ===
-def vectorize_label(label, fields):
+def vectorize_label(label, fields, id_field="id"):
     print(f"🚀 Vectorizing {label} nodes...")
-    nodes = fetch_nodes(label, fields)
+    nodes = fetch_nodes(label, fields, id_field=id_field)
     for node in tqdm(nodes, desc=f"🔢 Embedding {label}", unit="node"):
         text = " ".join(str(node.get(f, "") or "") for f in fields)
         if text.strip():
             try:
                 embedding = embed_text(text)
-                store_embedding(label, node["id"], embedding)
+                store_embedding(label, node["id"], embedding, id_field=id_field)
             except Exception as e:
                 print(f"[❌] Failed to embed {label} {node['id']}: {e}")
 
 # === Entry Point ===
 if __name__ == "__main__":
-    vectorize_label("CAPEC", ["name", "description", "prerequisites", "consequences", "executionFlow",
-                              "mitigations"])
-    vectorize_label("ATTACK_PATTERN", ["name", "description"])
+    vectorize_label(
+        "CAPEC",
+        ["name", "description", "prerequisites", "consequences", "executionFlow", "mitigations"],
+        id_field="id",
+    )
+    vectorize_label("ATTACK_PATTERN", ["name", "description"], id_field="id")
     print("✅ Embedding complete for CAPEC and ATTACK_PATTERN nodes.")
