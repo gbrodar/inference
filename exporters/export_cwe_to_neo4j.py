@@ -89,7 +89,6 @@ def create_cwe_relationships(cwe_json_path: str):
                         """, {"source_id": source_id, "target_id": related_cwe_id})
 
     logging.info("✅ Related CWE relationships created.")
-`
 
 def main():
     cwe_json_path = os.path.join("..", "data", "cwe", "cwe_data.json")
