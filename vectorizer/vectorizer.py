@@ -49,7 +49,18 @@ def vectorize_label(label, fields, id_field="id"):
     print(f"🚀 Vectorizing {label} nodes...")
     nodes = fetch_nodes(label, fields, id_field=id_field)
     for node in tqdm(nodes, desc=f"🔢 Embedding {label}", unit="node"):
-        text = " ".join(str(node.get(f, "") or "") for f in fields)
+        parts = []
+        for f in fields:
+            value = node.get(f)
+            if not value:
+                continue
+            if isinstance(value, (list, tuple, set)):
+                parts.extend(str(v) for v in value if v)
+            elif isinstance(value, dict):
+                parts.extend(str(v) for v in value.values() if v)
+            else:
+                parts.append(str(value))
+        text = " ".join(parts)
         if text.strip():
             try:
                 embedding = embed_text(text)
@@ -61,7 +72,19 @@ def vectorize_label(label, fields, id_field="id"):
 if __name__ == "__main__":
     vectorize_label(
         "CAPEC",
-        ["name", "description", "prerequisites", "consequences", "executionFlow", "mitigations"],
+        [
+            "name",
+            "description",
+            "prerequisites",
+            "consequences",
+            "executionFlow",
+            "skillsRequired",
+            "resourcesRequired",
+            "indicators",
+            "likelihood",
+            "severity",
+            "mitigations",
+        ],
         id_field="id",
     )
     vectorize_label("ATTACK_PATTERN", ["name", "description"], id_field="id")
