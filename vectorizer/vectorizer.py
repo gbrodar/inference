@@ -20,13 +20,23 @@ model = SentenceTransformer("BAAI/bge-base-en-v1.5", device="cuda")
 # === Query node data ===
 def fetch_nodes(label, fields, id_field="id"):
     with driver.session() as session:
-        result = session.run(
-            f"""
-            MATCH (n:{label})
-            RETURN n.{id_field} AS id, {", ".join([f"n.{f} AS {f}" for f in fields])}
-            """
-        )
-        return [record.data() for record in result]
+        if label == "CVE":
+            result = session.run(
+                f"""
+                MATCH (n:CVE)-[:HAS_CONTAINER]->(:Container)-[:HAS_DESCRIPTION]->(d:Description)
+                WITH n.{id_field} AS id, collect(d.value) AS descriptions
+                RETURN id, descriptions
+                """
+            )
+            return [record.data() for record in result]
+        else:
+            result = session.run(
+                f"""
+                MATCH (n:{label})
+                RETURN n.{id_field} AS id, {", ".join([f"n.{f} AS {f}" for f in fields])}
+                """
+            )
+            return [record.data() for record in result]
 
 # === Store embedding ===
 def store_embedding(label, node_id, embedding, id_field="id"):
@@ -88,4 +98,23 @@ if __name__ == "__main__":
         id_field="id",
     )
     vectorize_label("ATTACK_PATTERN", ["name", "description"], id_field="id")
-    print("✅ Embedding complete for CAPEC and ATTACK_PATTERN nodes.")
+    vectorize_label(
+        "CWE",
+        [
+            "name",
+            "description",
+            "extended_description",
+            "alternate_terms",
+            "potential_mitigations",
+        ],
+        id_field="id",
+    )
+    vectorize_label(
+        "KEV",
+        ["vendor", "product", "name", "description", "requiredAction", "notes"],
+        id_field="cveId",
+    )
+    vectorize_label("CVE", ["descriptions"], id_field="cveId")
+    print(
+        "✅ Embedding complete for CAPEC, ATTACK_PATTERN, CWE, KEV, and CVE nodes."
+    )
