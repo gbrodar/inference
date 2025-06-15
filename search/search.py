@@ -20,39 +20,53 @@ def _embed(text: str) -> np.ndarray:
     """Create an embedding for the given text."""
     return model.encode(text, convert_to_numpy=True)
 
-def semantic_search(label: str, query: str, top_k: int = 5):
-    """Perform semantic search over nodes of the provided label.
+def semantic_search(label: str | None = None, query: str = "", top_k: int = 5):
+    """Perform semantic search over nodes.
 
     Args:
-        label: The Neo4j node label to search.
+        label: Optional Neo4j node label to search. If ``None`` all labels are searched.
         query: Natural language query string.
         top_k: Number of results to return.
 
     Returns:
-        List of dictionaries containing node id, name, description and similarity score.
+        List of dictionaries containing node label, id, name, description and similarity score.
     """
     query_vec = _embed(query)
     with driver.session() as session:
+        match_clause = f"MATCH (n:{label})" if label else "MATCH (n)"
         result = session.run(
             f"""
-            MATCH (n:{label})
+            {match_clause}
             WHERE n.embedding IS NOT NULL
-            RETURN n.id AS id, n.name AS name, n.description AS description, n.embedding AS embedding
+            RETURN labels(n)[0] AS label, n.id AS id, n.name AS name, n.description AS description, n.embedding AS embedding
             """
         )
         matches = []
         for record in result:
             node_vec = np.array(record["embedding"])
-            score = float(np.dot(query_vec, node_vec) / (np.linalg.norm(query_vec) * np.linalg.norm(node_vec)))
-            matches.append({
-                "id": record["id"],
-                "name": record.get("name"),
-                "description": record.get("description"),
-                "score": score,
-            })
+            score = float(
+                np.dot(query_vec, node_vec)
+                / (np.linalg.norm(query_vec) * np.linalg.norm(node_vec))
+            )
+            matches.append(
+                {
+                    "label": record.get("label"),
+                    "id": record["id"],
+                    "name": record.get("name"),
+                    "description": record.get("description"),
+                    "score": score,
+                }
+            )
     matches.sort(key=lambda x: x["score"], reverse=True)
     return matches[:top_k]
 
 if __name__ == "__main__":
+    print("Label-specific search (CAPEC):")
     for result in semantic_search("CAPEC", "remote desktop exploitation", top_k=3):
         print(f"{result['score']:.3f} | {result['id']} | {result['name']}")
+
+    print("\nLabel-agnostic search:")
+    for result in semantic_search(query="remote desktop exploitation", top_k=3):
+        print(
+            f"{result['label']} | {result['score']:.3f} | {result['id']} | {result['name']}"
+        )
