@@ -46,12 +46,15 @@ def semantic_search(label: str | None = None, query: str = "", top_k: int = 5):
         for record in result:
             node = record["node"]
             node_vec = np.array(node["embedding"])
+
             score = float(
                 np.dot(query_vec, node_vec)
                 / (np.linalg.norm(query_vec) * np.linalg.norm(node_vec))
             )
+
             node_dict = dict(node)
             matches.append({"label": record.get("label"), **node_dict, "score": score})
+
     matches.sort(key=lambda x: x["score"], reverse=True)
     return matches[:top_k]
 
