@@ -1,0 +1,1053 @@
+[
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "embedding",
+    "propertyTypes": [
+      "DoubleArray"
+    ]
+  },
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`ATTACK_PATTERN`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAMPAIGN`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAMPAIGN`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAMPAIGN`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAMPAIGN`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`CAMPAIGN`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAMPAIGN`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "consequences",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "embedding",
+    "propertyTypes": [
+      "DoubleArray"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "executionFlow",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "indicators",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "likelihood",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "mitigations",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "prerequisites",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "resourcesRequired",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "severity",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CAPEC`",
+    "propertyName": "skillsRequired",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`COURSE_OF_ACTION`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`COURSE_OF_ACTION`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`COURSE_OF_ACTION`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`COURSE_OF_ACTION`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`COURSE_OF_ACTION`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`COURSE_OF_ACTION`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "assignerOrgId",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "assignerShortName",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "cveId",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "datePublished",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "dateReserved",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "dateUpdated",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "embedding",
+    "propertyTypes": [
+      "DoubleArray"
+    ]
+  },
+  {
+    "nodeType": ":`CVE`",
+    "propertyName": "state",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "abstraction",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "alternate_terms",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "consequences",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "embedding",
+    "propertyTypes": [
+      "DoubleArray"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "extended_description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "modes_of_introduction",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "observed_examples",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "potential_mitigations",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "related_attack_patterns",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "related_weaknesses",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "status",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`CWE`",
+    "propertyName": "taxonomy_mappings",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Container`",
+    "propertyName": "cveId",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Container`",
+    "propertyName": "type",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Description`",
+    "propertyName": "lang",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Description`",
+    "propertyName": "value",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`IDENTITY`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`IDENTITY`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`IDENTITY`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`IDENTITY`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`IDENTITY`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`IDENTITY`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`INTRUSION_SET`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`INTRUSION_SET`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`INTRUSION_SET`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`INTRUSION_SET`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`INTRUSION_SET`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`INTRUSION_SET`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "cveId",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "dateAdded",
+    "propertyTypes": [
+      "Date"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "dueDate",
+    "propertyTypes": [
+      "Date"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "embedding",
+    "propertyTypes": [
+      "DoubleArray"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "knownRansomwareCampaignUse",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "notes",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "product",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "requiredAction",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`KEV`",
+    "propertyName": "vendor",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MALWARE`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MALWARE`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MALWARE`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MALWARE`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`MALWARE`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MALWARE`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MARKING_DEFINITION`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MARKING_DEFINITION`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MARKING_DEFINITION`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MARKING_DEFINITION`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`MARKING_DEFINITION`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`MARKING_DEFINITION`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "attackComplexity",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "attackVector",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "availabilityImpact",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "baseScore",
+    "propertyTypes": [
+      "Long",
+      "Double"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "baseSeverity",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "confidentialityImpact",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "integrityImpact",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "privilegesRequired",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "scope",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "userInteraction",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "vectorString",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Metric`",
+    "propertyName": "version",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`ProblemType`",
+    "propertyName": "cweId",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`ProblemType`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Product`",
+    "propertyName": "product",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Product`",
+    "propertyName": "vendor",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`Reference`",
+    "propertyName": "tags",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`Reference`",
+    "propertyName": "url",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TOOL`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TOOL`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TOOL`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TOOL`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`TOOL`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TOOL`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TTP`",
+    "propertyName": "external_id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`TTP`",
+    "propertyName": "url",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_COLLECTION`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_COLLECTION`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_COLLECTION`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_COLLECTION`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_COLLECTION`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_COLLECTION`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_COMPONENT`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_COMPONENT`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_COMPONENT`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_COMPONENT`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_COMPONENT`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_COMPONENT`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_SOURCE`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_SOURCE`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_SOURCE`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_SOURCE`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_SOURCE`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_DATA_SOURCE`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_MATRIX`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_MATRIX`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_MATRIX`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_MATRIX`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_MATRIX`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_MATRIX`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_TACTIC`",
+    "propertyName": "created",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_TACTIC`",
+    "propertyName": "description",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_TACTIC`",
+    "propertyName": "id",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_TACTIC`",
+    "propertyName": "labels",
+    "propertyTypes": [
+      "StringArray"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_TACTIC`",
+    "propertyName": "modified",
+    "propertyTypes": [
+      "String"
+    ]
+  },
+  {
+    "nodeType": ":`X_MITRE_TACTIC`",
+    "propertyName": "name",
+    "propertyTypes": [
+      "String"
+    ]
+  }
+]
