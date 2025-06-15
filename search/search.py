@@ -29,7 +29,8 @@ def semantic_search(label: str | None = None, query: str = "", top_k: int = 5):
         top_k: Number of results to return.
 
     Returns:
-        List of dictionaries containing node label, id, name, description and similarity score.
+        List of dictionaries containing the node label, all node properties and
+        the similarity score.
     """
     query_vec = _embed(query)
     with driver.session() as session:
@@ -38,25 +39,22 @@ def semantic_search(label: str | None = None, query: str = "", top_k: int = 5):
             f"""
             {match_clause}
             WHERE n.embedding IS NOT NULL
-            RETURN labels(n)[0] AS label, n.id AS id, n.name AS name, n.description AS description, n.embedding AS embedding
+            RETURN labels(n)[0] AS label, n AS node
             """
         )
         matches = []
         for record in result:
-            node_vec = np.array(record["embedding"])
+            node = record["node"]
+            node_vec = np.array(node["embedding"])
+
             score = float(
                 np.dot(query_vec, node_vec)
                 / (np.linalg.norm(query_vec) * np.linalg.norm(node_vec))
             )
-            matches.append(
-                {
-                    "label": record.get("label"),
-                    "id": record["id"],
-                    "name": record.get("name"),
-                    "description": record.get("description"),
-                    "score": score,
-                }
-            )
+
+            node_dict = dict(node)
+            matches.append({"label": record.get("label"), **node_dict, "score": score})
+
     matches.sort(key=lambda x: x["score"], reverse=True)
     return matches[:top_k]
 
