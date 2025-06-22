@@ -3,6 +3,7 @@ import json
 import logging
 from tqdm import tqdm
 from neo4j import GraphDatabase
+import argparse
 
 from dotenv import load_dotenv
 # Load environment variables
@@ -60,56 +61,60 @@ def import_cve_file(file_path, driver):
         logging.error(error_message)
 
 def process_cve(cve_json, driver):
+    """Extract relevant information from a CVE JSON blob and create the node."""
     try:
-        #print(f"Processing CVE JSON: keys={list(cve_json.keys())}")
-        cve_id = cve_json.get('cveMetadata', {}).get('cveId')
+        meta = cve_json.get("cveMetadata", {})
+        cve_id = meta.get("cveId")
         if not cve_id:
-            raise ValueError(f"Missing cveMetadata.cveId. Content was: {cve_json}")
+            raise ValueError("Missing cveMetadata.cveId")
+
+        data = {
+            "cveId": cve_id,
+            "dateReserved": meta.get("dateReserved"),
+            "datePublished": meta.get("datePublished"),
+            # 'dateUpdated' or 'dateModified' may exist depending on the source
+            "dateModified": meta.get("dateUpdated") or meta.get("dateModified"),
+            "description": None,
+            "vectorString": None,
+            "baseScore": None,
+            "baseSeverity": None,
+        }
+
+        containers = cve_json.get("containers", {})
+        for container in containers.values():
+            if isinstance(container, dict):
+                container_list = [container]
+            elif isinstance(container, list):
+                container_list = container
+            else:
+                continue
+            for item in container_list:
+                if not isinstance(item, dict):
+                    continue
+                if data["description"] is None:
+                    descs = item.get("descriptions")
+                    if isinstance(descs, list) and descs:
+                        data["description"] = descs[0].get("value")
+                if data["vectorString"] is None:
+                    metrics = item.get("metrics")
+                    if isinstance(metrics, list) and metrics:
+                        first_metric = metrics[0]
+                        cvss = (
+                            first_metric.get("cvssV3_1")
+                            or first_metric.get("cvssV3_0")
+                            or first_metric
+                        )
+                        if isinstance(cvss, dict):
+                            data["vectorString"] = cvss.get("vectorString")
+                            data["baseScore"] = cvss.get("baseScore")
+                            data["baseSeverity"] = cvss.get("baseSeverity")
+                if data["description"] and data["vectorString"]:
+                    break
+            if data["description"] and data["vectorString"]:
+                break
 
         with driver.session() as session:
-            #print(f"Creating CVE node for {cve_id}")
-            session.execute_write(create_cve_node, cve_json.get('cveMetadata', {}))
-
-            containers = cve_json.get('containers', {})
-            #print(f"Containers found: {list(containers.keys())}")
-            for container_type, container_content in containers.items():
-                #print(f"Processing container: {container_type}")
-
-                if isinstance(container_content, dict):
-                    container_list = [container_content]
-                elif isinstance(container_content, list):
-                    container_list = container_content
-                else:
-                    print(f"⚠️ Unexpected container content type: {type(container_content).__name__}")
-                    continue
-
-                for container_data in container_list:
-                    if not isinstance(container_data, dict):
-                        print(f"⚠️ Skipping non-dict item inside container {container_type}: {container_data}")
-                        continue
-
-                    session.execute_write(create_container_node, cve_id, container_type)
-
-                    safe_iterate(session, cve_id, container_type, container_data.get('metrics', []), create_metric_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('references', []),
-                                 create_reference_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('affected', []),
-                                 create_product_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('descriptions', []),
-                                 create_description_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('problemTypes', []),
-                                 create_problem_type_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('configurations', []),
-                                 create_configuration_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('impacts', []), create_impact_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('solutions', []),
-                                 create_solution_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('exploits', []),
-                                 create_exploit_node)
-                    safe_iterate(session, cve_id, container_type, container_data.get('workarounds', []),
-                                 create_workaround_node)
-
-
+            session.execute_write(create_cve_node, data)
 
     except Exception as e:
         error_message = f"❌ Error inside process_cve: {e}"
@@ -125,27 +130,27 @@ def safe_iterate(session, cve_id, container_type, data, function_to_call):
             if isinstance(item, dict):
                 function_to_call(session, cve_id, container_type, item)
 
-def create_cve_node(tx, cve_metadata):
-    if not isinstance(cve_metadata, dict):
-        return
+def create_cve_node(tx, data):
     query = """
     MERGE (c:CVE {cveId: $cveId})
-    ON CREATE SET
-        c.state = $state,
-        c.assignerOrgId = $assignerOrgId,
-        c.assignerShortName = $assignerShortName,
-        c.dateReserved = $dateReserved,
+    SET c.dateReserved = $dateReserved,
         c.datePublished = $datePublished,
-        c.dateUpdated = $dateUpdated
+        c.dateModified = $dateModified,
+        c.description = $description,
+        c.vectorString = $vectorString,
+        c.baseScore = $baseScore,
+        c.baseSeverity = $baseSeverity
     """
-    tx.run(query,
-           cveId=cve_metadata.get('cveId'),
-           state=cve_metadata.get('state'),
-           assignerOrgId=cve_metadata.get('assignerOrgId'),
-           assignerShortName=cve_metadata.get('assignerShortName'),
-           dateReserved=cve_metadata.get('dateReserved'),
-           datePublished=cve_metadata.get('datePublished'),
-           dateUpdated=cve_metadata.get('dateUpdated')
+    tx.run(
+        query,
+        cveId=data.get("cveId"),
+        dateReserved=data.get("dateReserved"),
+        datePublished=data.get("datePublished"),
+        dateModified=data.get("dateModified"),
+        description=data.get("description"),
+        vectorString=data.get("vectorString"),
+        baseScore=data.get("baseScore"),
+        baseSeverity=data.get("baseSeverity"),
     )
 
 def create_container_node(tx, cve_id, container_type):
@@ -407,23 +412,34 @@ def create_workaround_node(tx, cve_id, container_type, workaround):
     )
 
 # --- Import multiple files ---
-def import_cve_data(directory, driver):
+def import_cve_data(directory, driver, years=None):
+    """Import CVE files from *directory* filtered by *years*.
+
+    If years is None or contains "all" then all subdirectories are scanned.
+    """
     cve_files = []
 
-    # Confirm os.walk is working
-    print(f"🔍 Scanning directory: {directory}")
+    if not years or "all" in years:
+        search_dirs = [directory]
+    else:
+        search_dirs = [os.path.join(directory, y) for y in years]
 
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.startswith("CVE-") and file.endswith(".json"):
-                full_path = os.path.join(root, file)
-                cve_files.append(full_path)
+    for search in search_dirs:
+        print(f"🔍 Scanning directory: {search}")
+        if not os.path.isdir(search):
+            print(f"⚠️ Directory does not exist: {search}")
+            continue
+        for root, _, files in os.walk(search):
+            for file in files:
+                if file.startswith("CVE-") and file.endswith(".json"):
+                    full_path = os.path.join(root, file)
+                    cve_files.append(full_path)
 
     if not cve_files:
         print("⚠️ No CVE files found. Check directory structure or path.")
         return
 
-    print(f"✅ Found {len(cve_files)} CVE JSON files in '{directory}'")
+    print(f"✅ Found {len(cve_files)} CVE JSON files")
 
     # Now import each file
     for cve_file in tqdm(cve_files, desc="📦 Importing CVE files", unit="file"):
@@ -435,15 +451,21 @@ def import_cve_data(directory, driver):
 # --- Main ---
 
 if __name__ == "__main__":
-    #cve_directory = './data/cve/2024'  # Directory containing CVE JSON files
-    #cve_directory = './data/cve/cvelistV5-main/cves/2024'  # Directory containing CVE JSON files
-    cve_directory = '../data/cve/cvelistV5-main/cves'  # Directory containing CVE JSON files
+    parser = argparse.ArgumentParser(description="Import CVE JSON files into Neo4j")
+    parser.add_argument(
+        "years",
+        nargs="*",
+        help="Years of CVEs to import (e.g. 2020 2021). Use 'all' or no argument to import everything.",
+    )
+    args = parser.parse_args()
+
+    cve_directory = "../data/cve/cvelistV5-main/cves"
     uri = "bolt://localhost:7687"
 
     driver = GraphDatabase.driver(uri, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
     create_constraint(driver)
-    import_cve_data(cve_directory, driver)
+    import_cve_data(cve_directory, driver, years=args.years)
 
     driver.close()
 
