@@ -34,6 +34,10 @@ def create_constraint(driver):
         CREATE CONSTRAINT cve_id_unique IF NOT EXISTS
         FOR (c:CVE) REQUIRE c.cveId IS UNIQUE
         """)
+        session.run("""
+        CREATE CONSTRAINT product_unique IF NOT EXISTS
+        FOR (p:Product) REQUIRE (p.vendor, p.product, p.version) IS UNIQUE
+        """)
 
 def import_cve_file(file_path, driver):
     try:
@@ -78,6 +82,7 @@ def process_cve(cve_json, driver):
             "vectorString": None,
             "baseScore": None,
             "baseSeverity": None,
+            "products": [],
         }
 
         containers = cve_json.get("containers", {})
@@ -108,6 +113,28 @@ def process_cve(cve_json, driver):
                             data["vectorString"] = cvss.get("vectorString")
                             data["baseScore"] = cvss.get("baseScore")
                             data["baseSeverity"] = cvss.get("baseSeverity")
+                affected = item.get("affected")
+                if isinstance(affected, list):
+                    for aff in affected:
+                        if not isinstance(aff, dict):
+                            continue
+                        vendor = aff.get("vendor")
+                        product = aff.get("product")
+                        versions = aff.get("versions", [])
+                        if not isinstance(versions, list):
+                            continue
+                        for v in versions:
+                            if (
+                                isinstance(v, dict)
+                                and v.get("status") == "affected"
+                            ):
+                                data["products"].append(
+                                    {
+                                        "vendor": vendor,
+                                        "product": product,
+                                        "version": v.get("version"),
+                                    }
+                                )
                 if data["description"] and data["vectorString"]:
                     break
             if data["description"] and data["vectorString"]:
@@ -145,6 +172,20 @@ def create_cve_node(tx, data):
         baseScore=data.get("baseScore"),
         baseSeverity=data.get("baseSeverity"),
     )
+
+    for prod in data.get("products", []):
+        tx.run(
+            """
+            MERGE (p:Product {vendor: $vendor, product: $product, version: $version})
+            WITH p
+            MATCH (c:CVE {cveId: $cveId})
+            MERGE (c)-[:AFFECTS]->(p)
+            """,
+            vendor=prod.get("vendor"),
+            product=prod.get("product"),
+            version=prod.get("version"),
+            cveId=data.get("cveId"),
+        )
 
 # --- Import multiple files ---
 def import_cve_data(directory, driver, years=None):
