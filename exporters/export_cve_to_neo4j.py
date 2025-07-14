@@ -119,7 +119,7 @@ def process_cve(cve_json, driver):
                         if not isinstance(aff, dict):
                             continue
                         vendor = aff.get("vendor")
-                        product = aff.get("product")
+                        product = aff.get("product") or ""
                         versions = aff.get("versions", [])
                         if not isinstance(versions, list):
                             continue
