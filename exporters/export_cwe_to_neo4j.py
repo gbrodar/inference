@@ -19,6 +19,17 @@ NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 driver = GraphDatabase.driver("bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
 
+def create_constraint():
+    """Ensure uniqueness of CWE nodes by id."""
+    with driver.session() as session:
+        session.run(
+            """
+            CREATE CONSTRAINT cwe_id_unique IF NOT EXISTS
+            FOR (c:CWE) REQUIRE c.id IS UNIQUE
+            """
+        )
+
+
 def import_cwe_data(cwe_json_path: str):
     logging.info(f"Loading CWE data from: {cwe_json_path}")
 
@@ -51,12 +62,25 @@ def import_cwe_data(cwe_json_path: str):
                 SET cwe += $props
             """, id=cwe_id, props=props)
 
-            # Link to CVE if problemType matches
-            session.run("""
+            # Link to ProblemType if it exists
+            session.run(
+                """
                 MATCH (cwe:CWE {id: $cwe_id})
                 MATCH (problem:ProblemType {cweId: $cwe_id})
                 MERGE (problem)-[:HAS_CWE]->(cwe)
-            """, cwe_id=cwe_id)
+                """,
+                cwe_id=cwe_id,
+            )
+
+            # Link to CVE nodes where cweId matches
+            session.run(
+                """
+                MATCH (cve:CVE {cweId: $cwe_id})
+                MATCH (cwe:CWE {id: $cwe_id})
+                MERGE (cve)-[:HAS_CWE]->(cwe)
+                """,
+                cwe_id=cwe_id,
+            )
 
     logging.info("✅ CWE import completed.")
 
@@ -97,6 +121,7 @@ def main():
         logging.error(f"File not found: {cwe_json_path}")
         return
 
+    create_constraint()
     import_cwe_data(cwe_json_path)
     create_cwe_relationships(cwe_json_path)
 
