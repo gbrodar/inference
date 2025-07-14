@@ -83,6 +83,7 @@ def process_cve(cve_json, driver):
             "baseScore": None,
             "baseSeverity": None,
             "products": [],
+            "cweId": None,
         }
 
         containers = cve_json.get("containers", {})
@@ -96,6 +97,24 @@ def process_cve(cve_json, driver):
             for item in container_list:
                 if not isinstance(item, dict):
                     continue
+                if data["cweId"] is None:
+                    problems = item.get("problemTypes") or item.get("ProblemTypes")
+                    if isinstance(problems, list):
+                        for pt in problems:
+                            if not isinstance(pt, dict):
+                                continue
+                            descs = pt.get("descriptions")
+                            if isinstance(descs, list):
+                                for desc in descs:
+                                    if isinstance(desc, dict):
+                                        cwe = desc.get("cweId")
+                                        if cwe:
+                                            data["cweId"] = cwe
+                                            break
+                                if data["cweId"]:
+                                    break
+                            if data["cweId"]:
+                                break
                 if data["description"] is None:
                     descs = item.get("descriptions")
                     if isinstance(descs, list) and descs:
@@ -135,9 +154,17 @@ def process_cve(cve_json, driver):
                                         "version": v.get("version") or "",
                                     }
                                 )
-                if data["description"] and data["vectorString"]:
+                if (
+                    data["description"]
+                    and data["vectorString"]
+                    and data["cweId"] is not None
+                ):
                     break
-            if data["description"] and data["vectorString"]:
+            if (
+                data["description"]
+                and data["vectorString"]
+                and data["cweId"] is not None
+            ):
                 break
 
         with driver.session() as session:
@@ -159,19 +186,21 @@ def create_cve_node(tx, data):
         c.description = $description,
         c.vectorString = $vectorString,
         c.baseScore = $baseScore,
-        c.baseSeverity = $baseSeverity
-    """
-    tx.run(
-        query,
-        cveId=data.get("cveId"),
-        dateReserved=data.get("dateReserved"),
-        datePublished=data.get("datePublished"),
-        dateModified=data.get("dateModified"),
-        description=data.get("description"),
-        vectorString=data.get("vectorString"),
-        baseScore=data.get("baseScore"),
-        baseSeverity=data.get("baseSeverity"),
-    )
+        c.baseSeverity = $baseSeverity"""
+    params = {
+        "cveId": data.get("cveId"),
+        "dateReserved": data.get("dateReserved"),
+        "datePublished": data.get("datePublished"),
+        "dateModified": data.get("dateModified"),
+        "description": data.get("description"),
+        "vectorString": data.get("vectorString"),
+        "baseScore": data.get("baseScore"),
+        "baseSeverity": data.get("baseSeverity"),
+    }
+    if data.get("cweId"):
+        query += ",\n        c.cweId = $cweId"
+        params["cweId"] = data.get("cweId")
+    tx.run(query, **params)
 
     for prod in data.get("products", []):
         tx.run(
