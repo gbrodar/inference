@@ -118,7 +118,7 @@ def process_cve(cve_json, driver):
                     for aff in affected:
                         if not isinstance(aff, dict):
                             continue
-                        vendor = aff.get("vendor")
+                        vendor = aff.get("vendor") or ""
                         product = aff.get("product") or ""
                         versions = aff.get("versions", [])
                         if not isinstance(versions, list):
@@ -132,7 +132,7 @@ def process_cve(cve_json, driver):
                                     {
                                         "vendor": vendor,
                                         "product": product,
-                                        "version": v.get("version"),
+                                        "version": v.get("version") or "",
                                     }
                                 )
                 if data["description"] and data["vectorString"]:
@@ -181,9 +181,9 @@ def create_cve_node(tx, data):
             MATCH (c:CVE {cveId: $cveId})
             MERGE (c)-[:AFFECTS]->(p)
             """,
-            vendor=prod.get("vendor"),
+            vendor=prod.get("vendor") or "",
             product=prod.get("product"),
-            version=prod.get("version"),
+            version=prod.get("version") or "",
             cveId=data.get("cveId"),
         )
 
