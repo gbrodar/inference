@@ -1,79 +1,50 @@
+import os
 import json
 from neo4j import GraphDatabase
 from tqdm import tqdm
-
 from dotenv import load_dotenv
 
-# Load environment variables
+# Load environment variables for Neo4j credentials
 load_dotenv()
 NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
+
 # Neo4j connection
-driver = GraphDatabase.driver("bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+driver = GraphDatabase.driver(
+    "bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD)
+)
 
 
-def import_kev_entry(tx, kev):
-    try:
-        tx.run("""
-            MERGE (k:KEV {cveId: $cveId})
-            SET k.vendor = $vendor,
-                k.product = $product,
-                k.name = $name,
-                k.description = $description,
-                k.dateAdded = date($dateAdded),
-                k.dueDate = date($dueDate),
-                k.requiredAction = $requiredAction,
-                k.notes = $notes,
-                k.knownRansomwareCampaignUse = $ransomwareUse
-        """,
-        cveId=kev.get("cveID"),
-        vendor=kev.get("vendorProject"),
-        product=kev.get("product"),
-        name=kev.get("vulnerabilityName"),
-        description=kev.get("shortDescription"),
-        dateAdded=kev.get("dateAdded"),
-        dueDate=kev.get("dueDate"),
-        requiredAction=kev.get("requiredAction"),
-        notes=kev.get("notes"),
-        ransomwareUse=kev.get("knownRansomwareCampaignUse"))
+def mark_all_cves(tx):
+    """Set the kev_exploited property to 'false' on all CVE nodes."""
+    tx.run("MATCH (c:CVE) SET c.kev_exploited = 'false'")
 
-        # Link to CVE
-        result = tx.run("MATCH (c:CVE {id: $cveId}) RETURN c", cveId=kev.get("cveID"))
-        if result.single():
-            tx.run("""
-                MATCH (c:CVE {id: $cveId})
-                MATCH (k:KEV {cveId: $cveId})
-                MERGE (c)-[:IS_EXPLOITED_IN]->(k)
-            """, cveId=kev.get("cveID"))
-        else:
-            print(f"[⚠️] CVE not found in graph: {kev.get('cveID')}")
 
-        # Link to CWE nodes if they exist
-        for cwe_id in kev.get("cwes", []):
-            if cwe_id:
-                result = tx.run("MATCH (w:CWE {id: $cweId}) RETURN w", cweId=cwe_id)
-                if result.single():
-                    tx.run("""
-                        MATCH (k:KEV {cveId: $cveId})
-                        MATCH (w:CWE {id: $cweId})
-                        MERGE (k)-[:RELATED_TO]->(w)
-                    """, cveId=kev.get("cveID"), cweId=cwe_id)
-                else:
-                    print(f"[⚠️] CWE not found: {cwe_id}")
+def mark_exploited(tx, cve_id):
+    """Set kev_exploited to 'true' for a specific CVE."""
+    tx.run(
+        "MATCH (c:CVE {cveId: $cve_id}) SET c.kev_exploited = 'true'",
+        cve_id=cve_id,
+    )
 
-    except Exception as e:
-        print(f"[❌] Error processing {kev.get('cveID')}: {e}")
 
-def load_kev_data(file_path):
-    with open(file_path, "r") as f:
+def update_kev_flags(file_path: str):
+    """Update CVE nodes with KEV exploitation information."""
+    with open(file_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    kev_entries = data.get("vulnerabilities", [])
-    print(f"📦 Total KEV entries to import: {len(kev_entries)}")
+    kev_cves = [
+        entry.get("cveID")
+        for entry in data.get("vulnerabilities", [])
+        if entry.get("cveID")
+    ]
+
     with driver.session() as session:
-        for kev in tqdm(kev_entries, desc="🚀 Importing KEV entries", unit="entry"):
-            session.write_transaction(import_kev_entry, kev)
+        session.write_transaction(mark_all_cves)
+        for cve_id in tqdm(kev_cves, desc="\U0001F504 Updating CVEs", unit="cve"):
+            session.write_transaction(mark_exploited, cve_id)
+
 
 if __name__ == "__main__":
-    load_kev_data("../data/kev/known_exploited_vulnerabilities.json")
-    print("✅ KEV import complete.")
+    update_kev_flags("../data/kev/known_exploited_vulnerabilities.json")
+    print("\u2705 KEV exploited flags updated.")
