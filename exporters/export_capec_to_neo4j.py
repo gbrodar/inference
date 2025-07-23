@@ -10,14 +10,46 @@ load_dotenv()
 NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 # Neo4j connection
-driver = GraphDatabase.driver("bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+driver = GraphDatabase.driver(
+    "bolt://localhost:7687", auth=(NEO4J_USERNAME, NEO4J_PASSWORD)
+)
+
+# Ensure CAPEC node uniqueness
+def create_constraint():
+    with driver.session() as session:
+        session.run(
+            """
+            CREATE CONSTRAINT capec_id_unique IF NOT EXISTS
+            FOR (c:CAPEC) REQUIRE c.id IS UNIQUE
+            """
+        )
 
 # --- Utilities ---
 
-def clean_related_weaknesses(rw_string):
+def parse_list(value: str):
+    """Return a list from a '::'-delimited string."""
+    if not value:
+        return []
+    return [v.strip() for v in str(value).split("::") if v.strip()]
+
+
+def parse_consequences(value: str):
+    """Parse the consequences field into a list."""
+    if not value:
+        return []
+    return [v.strip() for v in str(value).split("::") if v.strip()]
+
+
+def clean_related_weaknesses(rw_string: str):
+    """Extract CWE IDs from the related weaknesses field."""
     if not rw_string:
         return []
-    return [f"CWE-{w.strip()}" for w in rw_string.split("::") if w.strip().isdigit()]
+    ids = []
+    for part in rw_string.split("::"):
+        match = re.search(r"(\d+)", part)
+        if match:
+            ids.append(f"CWE-{match.group(1)}")
+    return ids
 
 def extract_capec_relationships(rap_string):
     if not rap_string:
@@ -32,34 +64,27 @@ def create_capec_node(tx, entry):
     capec_id = f"CAPEC-{capec_raw_id}"
 
     props = {
-        "capec_id": capec_id,
+        "id": capec_id,
         "name": entry.get("Name"),
+        "abstraction": entry.get("Abstraction"),
         "description": entry.get("Description"),
         "likelihood": entry.get("Likelihood Of Attack"),
         "severity": entry.get("Typical Severity"),
-        "prerequisites": entry.get("Prerequisites"),
-        "executionFlow": entry.get("Execution Flow"),
-        "skillsRequired": entry.get("Skills Required"),
-        "resourcesRequired": entry.get("Resources Required"),
-        "indicators": entry.get("Indicators"),
-        "consequences": entry.get("Consequences"),
-        "mitigations": entry.get("Mitigations"),
+        "execution_flow": parse_list(entry.get("Execution Flow")),
+        "prerequisites": parse_list(entry.get("Prerequisites")),
+        "resources_required": parse_list(entry.get("Resources Required")),
+        "consequences": parse_consequences(entry.get("Consequences")),
+        "taxonomy_mappings": parse_list(entry.get("Taxonomy Mappings")),
     }
 
-    tx.run("""
-        MERGE (c:CAPEC {id: $capec_id})
-        SET c.name = $name,
-            c.description = $description,
-            c.likelihood = $likelihood,
-            c.severity = $severity,
-            c.prerequisites = $prerequisites,
-            c.executionFlow = $executionFlow,
-            c.skillsRequired = $skillsRequired,
-            c.resourcesRequired = $resourcesRequired,
-            c.indicators = $indicators,
-            c.consequences = $consequences,
-            c.mitigations = $mitigations
-    """, **props)
+    tx.run(
+        """
+        MERGE (c:CAPEC {id: $id})
+        SET c += $props
+        """,
+        id=capec_id,
+        props=props,
+    )
 
 # --- Phase 2: Link relationships ---
 
@@ -83,12 +108,16 @@ def create_capec_relationships(tx, entry):
     for related_id, rel_type in extract_capec_relationships(entry.get("Related Attack Patterns", "")):
         result = tx.run("MATCH (r:CAPEC {id: $related_id}) RETURN r", related_id=related_id)
         if result.single():
-            tx.run("""
-                MATCH (c:CAPEC {id: $capec_id})
-                MATCH (r:CAPEC {id: $related_id})
-                MERGE (c)-[rel:RELATED_TO_CAPEC]->(r)
-                SET rel.type = $rel_type
-            """, capec_id=capec_id, related_id=related_id, rel_type=rel_type)
+            rel = re.sub(r"[^A-Za-z0-9_]", "_", rel_type).upper()
+            tx.run(
+                f"""
+                MATCH (c:CAPEC {{id: $capec_id}})
+                MATCH (r:CAPEC {{id: $related_id}})
+                MERGE (c)-[:{rel}]->(r)
+                """,
+                capec_id=capec_id,
+                related_id=related_id,
+            )
         else:
             print(f"[⚠️] Missing CAPEC {related_id} ({rel_type}) for {capec_id}")
 
@@ -157,8 +186,9 @@ def link_capecs_to_ttps_via_taxonomy(file_path):
                     print(f"[❌] Failed to link {capec_id} to {ttp_id}: {e}")
 
 if __name__ == "__main__":
-    #load_capec_data("../data/capec/capec_data.json")
     path_to_capec = "../data/capec/capec_data.json"
+    create_constraint()
+    load_capec_data(path_to_capec)
     link_capecs_to_ttps_via_taxonomy(path_to_capec)
     print("✅ CAPEC → TTP linking via Taxonomy complete.")
     print("✅ CAPEC import and relationship linking completed.")
