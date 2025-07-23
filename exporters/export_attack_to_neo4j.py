@@ -25,15 +25,17 @@ def create_constraint():
         )
 
 
-def create_ttp(tx, ttp_id, name, description, phases):
+def create_ttp(tx, ttp_id, ttp_reference, name, description, phases):
     tx.run(
         """
         MERGE (t:TTP {ttp_id: $ttp_id})
-        SET t.name = $name,
+        SET t.ttp_reference = $ttp_reference,
+            t.name = $name,
             t.description = $description,
             t.phases = $phases
         """,
         ttp_id=ttp_id,
+        ttp_reference=ttp_reference,
         name=name,
         description=description,
         phases=phases,
@@ -84,6 +86,7 @@ def import_attack_ttps(json_path: str):
                 session.execute_write(
                     create_ttp,
                     ttp_id,
+                    obj.get("id"),
                     name,
                     description,
                     phases,
