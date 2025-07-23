@@ -74,6 +74,7 @@ def create_capec_node(tx, entry):
         "prerequisites": parse_list(entry.get("Prerequisites")),
         "resources_required": parse_list(entry.get("Resources Required")),
         "consequences": parse_consequences(entry.get("Consequences")),
+        "taxonomy_mappings": parse_list(entry.get("Taxonomy Mappings")),
     }
 
     tx.run(
